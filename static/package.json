@@ -1,0 +1,14 @@
+{
+  "name": "weupinthis-webui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hfuller",
+  "license": "MIT",
+  "dependencies": {
+    "plyr": "^2.0.11"
+  }
+}

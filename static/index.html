@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>weupinthis Browser Player</title>
+		<script>
+			let lastPlayedAt = "";
+			let lastPlayedVideoId = "";
+			let players = null;
+			let playing = false;
+
+			document.addEventListener("DOMContentLoaded", function(event) { 
+				playNextSong();
+			});
+			function playSongFromTime(playedAt) {
+				console.log("Playing song from " + playedAt);
+				fetch('/plays/' + playedAt + '/youtube').then(function(response) {
+					response.text().then(function(stuff) {
+						console.log("got youtube id " + stuff);
+						if ( players == null ) {
+							document.getElementById("video").dataset.videoId = stuff;
+							players = plyr.setup();
+						} else {
+							players[0].source({
+								type: 'video',
+								sources: [{
+									src: stuff,
+									type: 'youtube'
+								}]
+							});
+						}
+
+						players[0].on('ready', function() {
+							players[0].play();
+							playing = true;
+						});
+						players[0].on('ended', function(event) {
+							if ( playing ) {
+								playNextSong();
+								playing = false;
+							}
+						});
+					});
+				});
+			}
+			function playNextSong() {
+				console.log("latest/skip:");
+				let url;
+				if ( lastPlayedAt == null ) {
+					url = '/plays/latest.json';
+				} else {
+					url = '/plays?skip=' + lastPlayedAt;
+				}
+				fetch(url).then(function(response) {
+					response.json().then(function(stuff) {
+						console.log(stuff);
+						if ( stuff != null && stuff.played_at != lastPlayedAt ) {
+							console.log("last played " + lastPlayedAt + " latest is " + stuff.played_at);
+							lastPlayedAt = stuff.played_at;
+							playSongFromTime(stuff.played_at);
+						} else {
+							console.log("last played and latest are both " + lastPlayedAt + " - playing random song");
+							fetch('/plays/random.json').then(function(response) {
+								response.json().then(function(stuff) {
+									console.log(stuff);
+									playSongFromTime(stuff.played_at);
+								});
+							});
+						}
+					});
+				});
+			}
+		</script>
+		<link rel="stylesheet" href="node_modules/plyr/dist/plyr.css">
+	</head>
+	<body>
+		<div class="plyr js-media-player">
+			<div id="video" data-video-id="" data-type="youtube"></div>
+		</div>
+
+		<script src="node_modules/plyr/dist/plyr.js"></script>
+	</body>
+</html>
