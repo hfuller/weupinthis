@@ -23,7 +23,7 @@ def get_latest_json():
 def get_plays_json():
 	skip = request.args['skip']
 	print("Retrieving plays after", skip)
-	cur.execute('''SELECT * FROM plays WHERE played_at > ? ORDER BY played_at DESC LIMIT 1;''', [skip])
+	cur.execute('''SELECT * FROM plays WHERE played_at > ? ORDER BY played_at ASC LIMIT 1;''', [skip])
 	row = cur.fetchone()
 	if row == None:
 		return json.dumps(row)
